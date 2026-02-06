@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقييم الذاتي - مقياس السعادة المهنية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #2C5F2D;
+            --secondary: #97BC62;
+            --accent: #E8B86D;
+            --background: #F8F9FA;
+            --text-dark: #2D3748;
+            --text-light: #718096;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Dubai', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            direction: rtl;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a3a1b 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+        
+        .progress-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: var(--text-dark);
+        }
+        
+        .progress-bar-container {
+            background: #e9ecef;
+            height: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--secondary) 0%, var(--primary) 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        
+        .question-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .question-card.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .manzil-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent) 0%, #d4a05d 100%);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .question-text {
+            font-size: 1.5em;
+            color: var(--text-dark);
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+        
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .option {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            color: var(--text-dark);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(151, 188, 98, 0.1) 0%, rgba(44, 95, 45, 0.1) 100%);
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+        
+        .option:hover::before {
+            width: 100%;
+        }
+        
+        .option:hover {
+            border-color: var(--secondary);
+            transform: translateX(-5px);
+        }
+        
+        .option.selected {
+            background: linear-gradient(135deg, rgba(151, 188, 98, 0.2) 0%, rgba(44, 95, 45, 0.2) 100%);
+            border-color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .option-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .option-radio {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--text-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .option.selected .option-radio {
+            border-color: var(--primary);
+        }
+        
+        .option.selected .option-radio::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .nav-button {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .nav-button.primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a3a1b 100%);
+            color: white;
+            flex: 1;
+        }
+        
+        .nav-button.secondary {
+            background: white;
+            color: var(--primary);
+            border: 3px solid var(--primary);
+        }
+        
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results-container {
+            display: none;
+        }
+        
+        .results-container.active {
+            display: block;
+        }
+        
+        .results-summary {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .results-summary h2 {
+            color: var(--primary);
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        .completion-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .results-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .result-action-card {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a3a1b 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: block;
+        }
+        
+        .result-action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(44, 95, 45, 0.4);
+        }
+        
+        .result-action-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .result-action-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .instruction-box {
+            background: linear-gradient(135deg, rgba(232, 184, 109, 0.1) 0%, rgba(151, 188, 98, 0.1) 100%);
+            border-right: 5px solid var(--accent);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .instruction-box h3 {
+            color: var(--primary);
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        
+        .instruction-box ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .instruction-box li {
+            padding: 8px 0;
+            padding-right: 25px;
+            position: relative;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+        
+        .instruction-box li::before {
+            content: '✓';
+            position: absolute;
+            right: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📝 التقييم الذاتي الشامل</h1>
+            <p>قيّم مستواك في المنازل السبعة من خلال 43 سؤالاً</p>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instruction-box">
+            <h3>📌 تعليمات التقييم</h3>
+            <ul>
+                <li>أجب بصدق وشفافية - لا توجد إجابات صحيحة أو خاطئة</li>
+                <li>فكّر في تجربتك الفعلية خلال الأشهر الثلاثة الماضية</li>
+                <li>اختر الإجابة الأقرب لواقعك حتى لو لم تكن مثالية</li>
+                <li>سيستغرق التقييم حوالي 15-20 دقيقة</li>
+            </ul>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-info">
+                <span>السؤال <span id="current-question">1</span> من <span id="total-questions">43</span></span>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Questions Container -->
+        <div id="questions-container"></div>
+
+        <!-- Results Container -->
+        <div class="results-container" id="results-container">
+            <div class="results-summary">
+                <h2>🎉 تهانينا!</h2>
+                <p style="font-size: 1.3em; color: var(--text-light); margin: 20px 0;">
+                    لقد أكملت التقييم الذاتي بنجاح
+                </p>
+                <div class="completion-badge">✅ تم حفظ نتائجك</div>
+                <p style="margin-top: 20px; color: var(--text-dark); line-height: 1.8;">
+                    شكراً لصدقك وشفافيتك في الإجابات. الآن يمكنك الانتقال لمشاهدة النتائج التفصيلية وخطة التطوير الشخصية
+                </p>
+            </div>
+
+            <div class="results-actions">
+                <a href="dashboard.html" class="result-action-card">
+                    <h3>📊 لوحة المعلومات</h3>
+                    <p>استعرض نتائجك التفصيلية ومستواك في كل منزل</p>
+                </a>
+                
+                <a href="development_plan.html" class="result-action-card">
+                    <h3>📝 خطة التطوير</h3>
+                    <p>احصل على توصيات مخصصة لتقوية كل منزل</p>
+                </a>
+                
+                <a href="workplace_ihsan_main.html" class="result-action-card">
+                    <h3>🏠 الصفحة الرئيسية</h3>
+                    <p>العودة لاستكشاف المزيد من الأدوات</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Assessment Data - 43 questions covering all 7 stations
+        const assessmentData = {
+            "التقوى": [
+                "أتجنب الكذب أو التضليل في تعاملاتي المهنية حتى في المواقف الصعبة",
+                "أحرص على أداء عملي بإتقان دون الحاجة لمراقبة مديري",
+                "أتجنب الغيبة والنميمة عن زملائي في العمل",
+                "أحافظ على أوقات الصلاة حتى في أيام العمل المزدحمة",
+                "أرفض المشاركة في أي معاملات مشبوهة أو غير أخلاقية",
+                "أحترم حقوق الملكية الفكرية ولا أستخدم موارد الشركة لأغراض شخصية"
+            ],
+            "اليقين": [
+                "أشعر بالطمأنينة بشأن رزقي ومستقبلي المهني",
+                "لا أقلق بشكل مفرط عند مواجهة تحديات مالية في العمل",
+                "أثق أن الله سيوفر لي ما أحتاجه مهما كانت الظروف",
+                "لا أشعر بالخوف من فقدان وظيفتي بشكل يؤثر على أدائي",
+                "أعتقد أن كل ما يحدث لي في العمل هو خير لي بطريقة ما",
+                "أرى التحديات المهنية كفرص للنمو وليست تهديدات"
+            ],
+            "التوكل": [
+                "أخطط جيداً لمهامي ثم أترك النتائج على الله",
+                "لا أشعر بالقلق الزائد بعد إتمام واجباتي بأفضل ما لدي",
+                "أتخذ القرارات المهمة بعد الاستخارة والاستشارة",
+                "لا أحمل نفسي فوق طاقتي لإثبات الذات أو الخوف من الفشل",
+                "أعتمد على الله أولاً ثم على مهاراتي وخبراتي",
+                "أستطيع النوم بهدوء حتى مع وجود مشاريع مهمة قادمة"
+            ],
+            "التسليم": [
+                "أتقبل قرارات الإدارة حتى لو لم أتفق معها شخصياً",
+                "أتعامل مع التغييرات المفاجئة في العمل بمرونة وصبر",
+                "لا أشتكي باستمرار من ظروف العمل أو الزملاء",
+                "أتقبل النقد البناء دون شعور بالدفاعية",
+                "أستطيع التأقلم بسرعة مع تغيير المهام أو المسؤوليات",
+                "أرى في الصعوبات حكمة إلهية حتى لو لم أفهمها الآن"
+            ],
+            "الرضا": [
+                "أشعر بالامتنان لوظيفتي ولو كانت بسيطة",
+                "لا أقارن راتبي أو منصبي بالآخرين بشكل يسبب لي الحزن",
+                "أرى البركة في عملي حتى في الأيام الصعبة",
+                "أشكر الله على ما أملك أكثر من تذمري مما ينقصني",
+                "أجد معنى وهدف في عملي حتى لو كان روتينياً",
+                "أشعر بالسكينة والهدوء النفسي في بيئة العمل",
+                "أرى عملي كنعمة وليس كعبء أو ضرورة فقط"
+            ],
+            "العبودية": [
+                "أبدأ يومي بنية أن عملي عبادة لله",
+                "أحرص على إخلاص النية في جميع أعمالي",
+                "أشعر أن الله يراني في كل ما أفعله في العمل",
+                "أتذكر الله بشكل منتظم خلال ساعات العمل",
+                "أحرص على ذكر الله عند بدء وإنهاء المهام",
+                "أسعى لخدمة الناس في عملي طلباً لرضا الله",
+                "أعتبر إتقان العمل جزءاً من عبادتي لله"
+            ],
+            "محبة الله": [
+                "أشعر بحب الله وقربه مني أثناء أداء عملي",
+                "يدفعني حب الله للإحسان في عملي أكثر من الخوف من العقوبات",
+                "أفرح بطاعة الله في عملي أكثر من فرحي بالمكافآت المادية",
+                "أشتاق للحظات التقرب إلى الله خلال اليوم",
+                "أشعر بالسعادة عندما أخدم الآخرين حباً في الله",
+                "أرى عملي كفرصة لتعميق علاقتي بالله",
+                "محبة الله هي الدافع الأساسي لتطوير نفسي مهنياً"
+            ]
+        };
+
+        // Flatten questions with metadata
+        let allQuestions = [];
+        Object.keys(assessmentData).forEach(manzil => {
+            assessmentData[manzil].forEach(question => {
+                allQuestions.push({
+                    manzil: manzil,
+                    text: question
+                });
+            });
+        });
+
+        // State
+        let currentQuestionIndex = 0;
+        let responses = [];
+
+        // Options
+        const options = [
+            { text: "نادراً أو أبداً", value: 1 },
+            { text: "أحياناً", value: 2 },
+            { text: "غالباً", value: 3 },
+            { text: "دائماً أو معظم الوقت", value: 4 }
+        ];
+
+        // Initialize
+        function init() {
+            renderQuestion();
+            updateProgress();
+        }
+
+        // Render current question
+        function renderQuestion() {
+            const container = document.getElementById('questions-container');
+            const question = allQuestions[currentQuestionIndex];
+            
+            const questionHTML = `
+                <div class="question-card active">
+                    <div class="manzil-badge">📍 ${question.manzil}</div>
+                    <div class="question-text">${question.text}</div>
+                    <div class="options">
+                        ${options.map((option, index) => `
+                            <div class="option" onclick="selectOption(${index}, ${option.value})">
+                                <div class="option-content">
+                                    <div class="option-radio"></div>
+                                    <span>${option.text}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="navigation">
+                        <button class="nav-button secondary" onclick="previousQuestion()" ${currentQuestionIndex === 0 ? 'disabled' : ''}>
+                            ← السابق
+                        </button>
+                        <button class="nav-button primary" id="next-button" onclick="nextQuestion()" disabled>
+                            ${currentQuestionIndex === allQuestions.length - 1 ? 'إنهاء التقييم ✓' : 'التالي →'}
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = questionHTML;
+            
+            // Restore previous answer if exists
+            if (responses[currentQuestionIndex] !== undefined) {
+                const selectedValue = responses[currentQuestionIndex];
+                const selectedIndex = options.findIndex(opt => opt.value === selectedValue);
+                if (selectedIndex !== -1) {
+                    selectOption(selectedIndex, selectedValue, false);
+                }
+            }
+        }
+
+        // Select option
+        function selectOption(index, value, shouldSave = true) {
+            // Remove previous selection
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selection to clicked option
+            document.querySelectorAll('.option')[index].classList.add('selected');
+            
+            // Enable next button
+            document.getElementById('next-button').disabled = false;
+            
+            // Save response
+            if (shouldSave) {
+                responses[currentQuestionIndex] = value;
+            }
+        }
+
+        // Next question
+        function nextQuestion() {
+            if (responses[currentQuestionIndex] === undefined) {
+                alert('الرجاء اختيار إجابة قبل المتابعة');
+                return;
+            }
+            
+            if (currentQuestionIndex < allQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                // Complete assessment
+                completeAssessment();
+            }
+        }
+
+        // Previous question
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Update progress
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / allQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('total-questions').textContent = allQuestions.length;
+            document.getElementById('progress-percent').textContent = Math.round(progress) + '%';
+        }
+
+        // Complete assessment
+        function completeAssessment() {
+            // Calculate scores by manzil
+            const scores = {};
+            allQuestions.forEach((q, index) => {
+                if (!scores[q.manzil]) {
+                    scores[q.manzil] = { total: 0, count: 0 };
+                }
+                scores[q.manzil].total += responses[index];
+                scores[q.manzil].count++;
+            });
+            
+            // Calculate averages
+            const results = {};
+            Object.keys(scores).forEach(manzil => {
+                results[manzil] = (scores[manzil].total / scores[manzil].count).toFixed(2);
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('ihsan_assessment_results', JSON.stringify(results));
+            localStorage.setItem('ihsan_assessment_responses', JSON.stringify(responses));
+            localStorage.setItem('ihsan_assessment_date', new Date().toISOString());
+            
+            // Show results
+            document.getElementById('questions-container').style.display = 'none';
+            document.querySelector('.progress-container').style.display = 'none';
+            document.querySelector('.instruction-box').style.display = 'none';
+            document.getElementById('results-container').classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Start on load
+        window.onload = init;
+    </script>
+</body>
+</html>
